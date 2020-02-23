@@ -1,6 +1,6 @@
-package com.gmail.matejpesl1.osu.mapcleaner;
+package com.gmail.matejpesl1.osu.beatmapcleaner.main;
 
-import com.gmail.matejpesl1.osu.mapcleaner.tools.ConsolePrinter;
+import com.gmail.matejpesl1.osu.beatmapcleaner.tools.ConsolePrinter;
 
 public class Main extends ConsolePrinter {
 	public static boolean isEnviromentIde;

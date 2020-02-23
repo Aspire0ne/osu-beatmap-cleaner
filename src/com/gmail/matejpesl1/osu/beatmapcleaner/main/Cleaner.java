@@ -1,9 +1,10 @@
-package com.gmail.matejpesl1.osu.mapcleaner;
+package com.gmail.matejpesl1.osu.beatmapcleaner.main;
 
 import java.util.Arrays;
 import java.util.Scanner;
 import org.eclipse.jdt.annotation.Nullable;
-import com.gmail.matejpesl1.osu.mapcleaner.tools.ConsolePrinter;
+
+import com.gmail.matejpesl1.osu.beatmapcleaner.tools.ConsolePrinter;
 
 public class Cleaner extends ConsolePrinter {
 	public static final Scanner sc = new Scanner(System.in);
