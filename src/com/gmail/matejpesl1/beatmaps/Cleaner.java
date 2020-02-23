@@ -5,9 +5,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jdt.annotation.Nullable;
-import com.gmail.matejpesl1.beatmaps.Filter.DifficultyOperator;
-import com.gmail.matejpesl1.beatmaps.Filter.OsuMode;
 import com.gmail.matejpesl1.beatmaps.tools.ConsolePrinter;
 
 public class Cleaner extends ConsolePrinter {
@@ -15,83 +12,20 @@ public class Cleaner extends ConsolePrinter {
 	public static final String[] ABCD_OPTIONS = {"a", "b", "c", "d"};
 	private enum CleanerOption {REMOVE_VIDEOS, REMOVE_IMAGES,
 		REMOVE_BEATMAPS, REMOVE_SKIN};
-	private OsuDir osuDir;
-	private CleanerOption cleanerOption;
-	private Filter filter;
 	
 	public Cleaner() {
 		
 	}
 	
 	public void showMenu() {
-		cleanerOption = obtainCleanerOption();
-		filter = obtainCleanerFilter();
-		osuDir = new OsuDir(OsuDir.obtainDir());
+		CleanerOption cleanerOption = obtainCleanerOption();
+		Filter filter = Filter.obtainCleanerFilters();
+		OsuDir osuDir = new OsuDir(OsuDir.obtainDir());
+		cleanSongs(osuDir, filter, cleanerOption);
 	}
 	
-	private Filter obtainCleanerFilter() {
-		println(MsgType.ORDINARY, "\nNow select filter:"
-				+ "\na - none (apply option to all beatmaps)"
-				+ "\nb - by difficulty"
-				+ "\nc - by mode"
-				+ "\nd - by mode AND difficulty");
+	private void cleanSongs(OsuDir osuDir, Filter  filter, CleanerOption option) {
 		
-		Filter filter = new Filter();
-		
-		switch (getInput(ABCD_OPTIONS)) {
-			case "a": break;
-			case "b": filter = obtainDifficultyFilter(null); break;
-			case "c": filter = obtainModeFilter(null); break;
-			case "d": filter = obtainDifficultyFilter(obtainModeFilter(filter)); break;
-		}
-		System.out.println("filters: " + filter.getFilters());
-		return filter;
-	}
-	
-	private Filter obtainModeFilter(@Nullable Filter filter) {
-		Filter modifiedFilter = (filter == null ? new Filter() : filter);
-		println(MsgType.ORDINARY,
-				"choose mode:"
-				+ "\na - osu!standard"
-				+ "\nb - osu!mania"
-				+ "\nc - osu!catch"
-				+ "\nd - osu!taiko");
-		String input = getInput(ABCD_OPTIONS);
-		OsuMode mode = null;
-		switch (input) {
-		case "a": mode = OsuMode.STANDARD; break;
-		case "b": mode = OsuMode.MANIA; break;
-		case "c": mode = OsuMode.CATCH; break;
-		case "d": mode = OsuMode.TAIKO; break;
-		}
-		modifiedFilter.addModeFilter(mode);
-		return modifiedFilter;
-	}
-	
-	private Filter obtainDifficultyFilter(@Nullable Filter filter) {
-		Filter modifiedFilter = (filter == null ? new Filter() : filter);
-		println(MsgType.ORDINARY, 
-				"choose difficulty:\n[supported operators:]"
-				+ "\n\"<\" (less than x) e.g. <5"
-				+ "\n\">\" (greater than x) e.g. >5"
-				+ "\nnone (matches exactly the input number) - e.g. 2");
-		String input = getDifficultyInput();
-		if (input.contains(">")) {
-			modifiedFilter.addDifficultyFilter(Byte.parseByte(input.replaceAll("\\D+","")), DifficultyOperator.GREATER_THAN);
-		} else if (input.contains("<")) {
-			modifiedFilter.addDifficultyFilter(Byte.parseByte(input.replaceAll("\\D+","")), DifficultyOperator.LESS_THAN);
-		} else {
-			modifiedFilter.addDifficultyFilter(Byte.parseByte(input), DifficultyOperator.NONE);
-		}
-		return modifiedFilter;
-	}
-	
-	private String getDifficultyInput() {
-		String diffRange = "[0-9]|1[0-5]";
-		Pattern[] options = {Pattern.compile(diffRange),
-				Pattern.compile("[<]" + diffRange),
-				Pattern.compile("[>]" + diffRange)};
-		return getInput(options, true);
 	}
 
 	private CleanerOption obtainCleanerOption() {

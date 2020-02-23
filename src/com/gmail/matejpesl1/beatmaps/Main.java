@@ -4,6 +4,7 @@ import com.gmail.matejpesl1.beatmaps.tools.ConsolePrinter;
 
 public class Main extends ConsolePrinter {
 	public static boolean isEnviromentIde;
+	public static final String[] EMPTY_ARRAY = {};
 	
 	public static void main(String[] args) {
 		isEnviromentIde = isEnviromentIde();

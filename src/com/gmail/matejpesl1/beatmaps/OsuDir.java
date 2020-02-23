@@ -35,7 +35,7 @@ public class OsuDir extends Cleaner {
 		
 		while (true) {
 			System.out.print(beginning);
-			String inputPath = getInput(null).replace("/", "\\");
+			String inputPath = getInput(Main.EMPTY_ARRAY).replace("/", "\\");
 			File inputOsuDir = new File(beginning + inputPath);
 			
 			if (!inputOsuDir.exists()) {
