@@ -1,4 +1,4 @@
-package com.gmail.matejpesl1.osu.beatmapcleaner.tools;
+package com.gmail.matejpesl1.beatmaps.tools;
 
 import java.io.File;
 import java.io.IOException;

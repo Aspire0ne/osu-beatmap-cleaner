@@ -1,8 +1,8 @@
-package com.gmail.matejpesl1.osu.beatmapcleaner.main;
+package com.gmail.matejpesl1.beatmaps;
 
 import java.io.File;
 
-import com.gmail.matejpesl1.osu.beatmapcleaner.tools.FileUtils;
+import com.gmail.matejpesl1.beatmaps.tools.FileUtils;
 
 public class OsuDir extends Cleaner {
 	public static final File DEFAULT_OSU_DIR = new File(FileUtils.ROOT + "\\AppData\\Local\\osu!");

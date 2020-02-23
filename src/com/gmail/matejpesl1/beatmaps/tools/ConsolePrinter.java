@@ -1,8 +1,8 @@
-package com.gmail.matejpesl1.osu.beatmapcleaner.tools;
+package com.gmail.matejpesl1.beatmaps.tools;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.gmail.matejpesl1.osu.beatmapcleaner.main.Main;
+import com.gmail.matejpesl1.beatmaps.Main;
 
 public class ConsolePrinter {
 	public enum MsgType{ERROR, INFO, ORDINARY, DEBUG};

@@ -1,6 +1,6 @@
-package com.gmail.matejpesl1.osu.beatmapcleaner.main;
+package com.gmail.matejpesl1.beatmaps;
 
-import com.gmail.matejpesl1.osu.beatmapcleaner.tools.ConsolePrinter;
+import com.gmail.matejpesl1.beatmaps.tools.ConsolePrinter;
 
 public class Main extends ConsolePrinter {
 	public static boolean isEnviromentIde;
@@ -52,7 +52,10 @@ public class Main extends ConsolePrinter {
 	
 	public static void sleep(int duration) {
 		try {
-			Thread.sleep(duration);
+			if (!isEnviromentIde) {
+				Thread.sleep(duration);	
+			}
+			
 		} catch (InterruptedException e) {
 			println(MsgType.ERROR, "Main thread was interrupted from sleep", e);
 		}
