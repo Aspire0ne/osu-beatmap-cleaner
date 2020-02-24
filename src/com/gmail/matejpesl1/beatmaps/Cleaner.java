@@ -1,19 +1,14 @@
 package com.gmail.matejpesl1.beatmaps;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-
 import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
 import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
 
-public class Cleaner extends ConsolePrinter implements FileVisitor<Path> {
+public class Cleaner extends ConsolePrinter {
 	public static final String[] ABCD_OPTIONS = {"a", "b", "c", "d"};
-	private enum CleanerOption {REMOVE_VIDEOS, REMOVE_IMAGES,
-		REMOVE_BEATMAPS, REMOVE_SKIN};
-	
+	public enum CleanerOption {REMOVE_BACKGROUNDS, REMOVE_BEATMAPS,
+		REMOVE_SKIN, REMOVE_STORYBOARDS, REMOVE_SOUNDS};
+		
 	public Cleaner() {
 		
 	}
@@ -22,9 +17,12 @@ public class Cleaner extends ConsolePrinter implements FileVisitor<Path> {
 		CleanerOption cleanerOption = obtainCleanerOption();
 		Filter filter = Filter.obtainCleanerFilters();
 		OsuDir osuDir = new OsuDir(OsuDir.obtainDir());
+		
 		println(MsgType.INFO, "Press any key to start the process");
+		
 		waitForKeyPress();
-		cleanSongs(osuDir, filter, cleanerOption);
+		BeatmapVisitor visitor = new BeatmapVisitor(osuDir);
+		visitor.cleanSongs(filter, cleanerOption);
 	}
 	
 	private void waitForKeyPress() {
@@ -41,31 +39,6 @@ public class Cleaner extends ConsolePrinter implements FileVisitor<Path> {
 					+ "\nProgram will start the process", e);
 		}
 	}
-	
-	private void cleanSongs(OsuDir osuDir, Filter  filter, CleanerOption option) {
-		println(MsgType.INFO, "starting process...");
-		
-	}
-	
-	@Override
-	public FileVisitResult postVisitDirectory(Path arg0, IOException arg1) throws IOException {
-		return null;
-	}
-
-	@Override
-	public FileVisitResult preVisitDirectory(Path arg0, BasicFileAttributes arg1) throws IOException {
-		return null;
-	}
-
-	@Override
-	public FileVisitResult visitFile(Path arg0, BasicFileAttributes arg1) throws IOException {
-		return null;
-	}
-
-	@Override
-	public FileVisitResult visitFileFailed(Path arg0, IOException arg1) throws IOException {
-		return null;
-	}
 
 	private CleanerOption obtainCleanerOption() {
 		println(MsgType.ORDINARY, "Select Cleaner option"
@@ -74,14 +47,17 @@ public class Cleaner extends ConsolePrinter implements FileVisitor<Path> {
 				+ "\na - remove background videos"
 				+ "\nb - remove background images"
 				+ "\nc - remove beatmaps"
-				+ "\nd - remove beatmaps' skin");
+				+ "\nd - remove beatmaps' skin"
+				+ "\ne - remove beatmaps' sound effects"
+				+ "\nf - remove beatmaps' storyboard");
 		
-		String[] abcdOptions = {"a", "b", "c", "d"};
-		switch (ConsoleReader.getInput(abcdOptions)) {
-			case "a": return CleanerOption.REMOVE_VIDEOS;
-			case "b": return CleanerOption.REMOVE_IMAGES;
+		String[] options = {"a", "b", "c", "d", "e"};
+		switch (ConsoleReader.getInput(options)) {
+			case "a": return CleanerOption.REMOVE_STORYBOARDS;
+			case "b": return CleanerOption.REMOVE_BACKGROUNDS;
 			case "c": return CleanerOption.REMOVE_BEATMAPS;
 			case "d": return CleanerOption.REMOVE_SKIN;
+			case "e": return CleanerOption.REMOVE_SOUNDS;
 		}
 		return null;
 	}

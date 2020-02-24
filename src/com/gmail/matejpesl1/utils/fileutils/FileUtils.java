@@ -8,18 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-
-import com.gmail.matejpesl1.beatmaps.Filter;
 
 public class FileUtils {
 	public static final String ROOT = System.getProperty("user.home");
@@ -59,95 +48,5 @@ public class FileUtils {
 	
 	public static void deleteFile(File file) throws SecurityException, IOException {
     	Files.deleteIfExists(file.toPath());
-	}
-	
-	public class FileSearch implements FileVisitor<Path> {
-		private final ArrayList<String> finalFiles = new ArrayList<>();
-		private final ArrayList<String> extensions = new ArrayList<>();
-		private final Path dirToSearch;
-		private final String nameOfStartingDir;
-		private ArrayList<String> namesOfDirsToSkip = new ArrayList<>();
-		private boolean returnFileNames;
-		
-		public FileSearch(Path dir) {
-			this.extensions.addAll(extensions);
-			nameOfStartingDir = dir.getFileName().toString();
-			dirToSearch = dir;
-		}
-		
-		public ArrayList<String> searchFiles(Filter filter, ArrayList<String> namesOfDirsToSkip) {
-			this.namesOfDirsToSkip = namesOfDirsToSkip;
-			
-			try {
-				Files.walkFileTree(dirToSearch, EnumSet.noneOf(FileVisitOption.class), includeSubDirs ? Integer.MAX_VALUE : 1, this);
-			} catch (IOException e) {
-				e.printStackTrace();
-				
-			}
-			return finalFiles;
-		}
-		
-		
-		
-		
-		@Override
-		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attributes) {
-			String dirName = dir.getFileName().toString().toLowerCase();
-			String pathToDir = dir.toString();
-			if (namesOfDirsToSkip != null && namesOfDirsToSkip.parallelStream().anyMatch(dirName::equals)) {
-				return FileVisitResult.SKIP_SUBTREE;
-			}
-
-			if (dirName.equals(nameOfStartingDir) || extensions != null) {
-				return FileVisitResult.CONTINUE;
-			}
-
-			finalFiles.add(returnFileNames ? dirName : pathToDir);	
-			
-			return FileVisitResult.CONTINUE;
-		}
-
-		
-		
-		
-		@Override
-		public FileVisitResult visitFile(Path filePath, BasicFileAttributes attributes) {
-			String filename = filePath.getFileName().toString().toLowerCase();
-			String fileExtension = filePath.toFile().isDirectory() ? "" : filename.substring(filename.lastIndexOf(".") + 1);
-			String pathToFile = filePath.toString();
-			boolean extensionEquals = false;
-			
-			if (extensions != null) {
-				for (String extension : extensions) {
-					if (fileExtension.equals(extension)) {
-						extensionEquals = true;
-						break;
-					}
-				}
-			}
-			
-			if (!extensionEquals && extensions != null) {
-				return FileVisitResult.CONTINUE;
-			}
-			
-			finalFiles.add(returnFileNames ? filename : pathToFile);
-			return FileVisitResult.CONTINUE;
-		}
-		
-		
-		
-		
-		@Override
-		public FileVisitResult visitFileFailed(Path file, IOException exc) {
-			return FileVisitResult.CONTINUE;
-		}
-
-		
-		
-		
-		@Override
-		public FileVisitResult postVisitDirectory(Path file, IOException exc) {
-			return FileVisitResult.CONTINUE;
-		}
 	}
 }

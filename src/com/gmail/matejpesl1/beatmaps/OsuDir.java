@@ -7,8 +7,8 @@ import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
 
 public class OsuDir {
 	public static final File DEFAULT_OSU_DIR = new File(FileUtils.ROOT + "\\AppData\\Local\\osu!");
-	public final File dir;
-	public final File songsDir;
+	private final File dir;
+	private final File songsDir;
 	
 	public OsuDir(File osuDir) {
 		this.dir = osuDir;
@@ -45,5 +45,13 @@ public class OsuDir {
 			}
 			return inputOsuDir;	
 		}
+	}
+	
+	public File getDir() {
+		return dir;
+	}
+	
+	public File getSongsDir() {
+		return songsDir;
 	}
 }

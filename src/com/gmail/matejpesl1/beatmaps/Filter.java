@@ -11,12 +11,6 @@ public class Filter extends Cleaner {
 	public enum BeatmapFilter {DIFFICULTY, MODE};
 	public enum OsuMode {TAIKO, STANDARD, MANIA, CATCH};
 	public enum DifficultyOperator {LESS_THAN, GREATER_THAN, NONE};
-	/*
-	 * 0 = osu!standard
-	 * 1 = osu!catch
-	 * 2 = osu!taiko
-	 * 3 = osu!mania
-	 */
 	
 	private ArrayList<BeatmapFilter> filters = new ArrayList<>();
 	private byte difficulty;
@@ -32,7 +26,7 @@ public class Filter extends Cleaner {
 				+ "\na - none (apply option to all beatmaps)"
 				+ "\nb - by difficulty"
 				+ "\nc - by mode"
-				+ "\nd - by mode AND difficulty");
+				+ "\nd - by mode AND difficulty (both conditions MUST be true)");
 		
 		Filter filter = new Filter();
 		
@@ -42,7 +36,7 @@ public class Filter extends Cleaner {
 			case "c": filter = obtainModeFilter(null); break;
 			case "d": filter = obtainDifficultyFilter(obtainModeFilter(filter)); break;
 		}
-		println(MsgType.DEBUG, "filters: " + filter.getFilters());
+		println(MsgType.DEBUG, "filters: " + filter.getBeatmapFilters());
 		println(MsgType.ORDINARY, "\n");
 		return filter;
 	}
@@ -93,7 +87,7 @@ public class Filter extends Cleaner {
 		return ConsoleReader.getInput(options, true);
 	}
 	
-	public ArrayList<BeatmapFilter> getFilters() {
+	public ArrayList<BeatmapFilter> getBeatmapFilters() {
 		return filters;
 	}
 	
@@ -112,13 +106,12 @@ public class Filter extends Cleaner {
 	public byte getDifficulty() {
 		return difficulty;
 	}
+	public DifficultyOperator getDifficultyOperator() {
+		return operator;
+	}
 	
 	public OsuMode getMode() {
 		return mode;
-	}
-	
-	public DifficultyOperator getDifficultyOperator() {
-		return operator;
 	}
 	
 	public void addModeFilter(OsuMode mode) {
