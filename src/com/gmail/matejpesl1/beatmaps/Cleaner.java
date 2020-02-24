@@ -1,11 +1,15 @@
 package com.gmail.matejpesl1.beatmaps;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
 import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
 
-public class Cleaner extends ConsolePrinter {
+public class Cleaner extends ConsolePrinter implements FileVisitor<Path> {
 	public static final String[] ABCD_OPTIONS = {"a", "b", "c", "d"};
 	private enum CleanerOption {REMOVE_VIDEOS, REMOVE_IMAGES,
 		REMOVE_BEATMAPS, REMOVE_SKIN};
@@ -39,8 +43,28 @@ public class Cleaner extends ConsolePrinter {
 	}
 	
 	private void cleanSongs(OsuDir osuDir, Filter  filter, CleanerOption option) {
-		println(MsgType.INFO, "starting proces...");
+		println(MsgType.INFO, "starting process...");
 		
+	}
+	
+	@Override
+	public FileVisitResult postVisitDirectory(Path arg0, IOException arg1) throws IOException {
+		return null;
+	}
+
+	@Override
+	public FileVisitResult preVisitDirectory(Path arg0, BasicFileAttributes arg1) throws IOException {
+		return null;
+	}
+
+	@Override
+	public FileVisitResult visitFile(Path arg0, BasicFileAttributes arg1) throws IOException {
+		return null;
+	}
+
+	@Override
+	public FileVisitResult visitFileFailed(Path arg0, IOException arg1) throws IOException {
+		return null;
 	}
 
 	private CleanerOption obtainCleanerOption() {
