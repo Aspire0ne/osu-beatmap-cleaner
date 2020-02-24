@@ -1,32 +1,17 @@
 package com.gmail.matejpesl1.beatmaps;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.gmail.matejpesl1.beatmaps.BeatmapInfo.Info;
 import com.gmail.matejpesl1.beatmaps.Cleaner.CleanerOption;
-import com.gmail.matejpesl1.beatmaps.Filter.OsuMode;
 import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
 
 public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> {
-	private static final ArrayList<String> regionsToRead =
-			new ArrayList<>(Arrays.asList("[Events]", "[General]", "[Difficulty]"));
 	private final OsuDir osuDir;
 	Filter filter;
 	CleanerOption option;
@@ -93,58 +78,6 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 				break;
 			}
 		}
-	}
-	
-	private BeatmapInfo getBeatmapInfo(Path beatmap, ArrayList<Info> infoToReturn) throws IOException {
-		FileInputStream stream = new FileInputStream(beatmap.toFile());
-		Reader reader = new InputStreamReader(stream, "windows-1250");
-		BufferedReader br = new BufferedReader(reader);
-
-		byte regionsRead = 0;
-		Pattern newRegionPattern = Pattern.compile("[.*]");
-		Pattern backgroundImgPattern = Pattern.compile(".*\".*.jpg\".*");
-		String line = new String();
-		String diffLine = new String();
-		String modeLine = new String();
-		String backgroundImgNameLine = new String();
-		
-		while ((line = br.readLine()) != null) {
-			if (newRegionPattern.matcher(line.trim()).matches()
-					|| (modeLine != null && diffLine != null && backgroundImgNameLine != null)) {
-				if (regionsRead == regionsToRead.size()) {
-					break;
-				} else if (regionsToRead.contains(line)) {
-					++regionsRead;
-				}
-			}
-			
-			if (backgroundImgPattern.matcher(line.trim()).matches()) {
-				backgroundImgNameLine = line;
-			} else if (line.contains("Mode:")) {
-				modeLine = line;
-			} else if (line.contains("OverallDifficulty:")) {
-				diffLine = line;
-			}
-		}
-		br.close();
-	    reader.close();
-	    stream.close();
-	    
-		float difficulty = Float.parseFloat(diffLine.replaceAll("[^\\d.]", ""));
-		byte modeNum = Byte.parseByte(modeLine.replaceAll("[^\\d.]", ""));
-		OsuMode mode = null;
-		String backgroundImgName = 
-				backgroundImgNameLine.substring(
-						backgroundImgNameLine.indexOf('\"')+1,
-						backgroundImgNameLine.lastIndexOf('\"'));
-		switch (modeNum) {
-		case 0: mode = OsuMode.STANDARD; break;
-		case 1: mode = OsuMode.CATCH; break;
-		case 2: mode = OsuMode.TAIKO; break;
-		case 3: mode = OsuMode.MANIA; break;
-		}
-		
-	    return new BeatmapInfo(backgroundImgName, mode, difficulty);
 	}
 	
 	@Override
