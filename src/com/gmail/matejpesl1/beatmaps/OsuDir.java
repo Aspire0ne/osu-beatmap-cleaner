@@ -2,9 +2,10 @@ package com.gmail.matejpesl1.beatmaps;
 
 import java.io.File;
 
-import com.gmail.matejpesl1.beatmaps.tools.FileUtils;
+import com.gmail.matejpesl1.utils.fileutils.FileUtils;
+import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
 
-public class OsuDir extends Cleaner {
+public class OsuDir {
 	public static final File DEFAULT_OSU_DIR = new File(FileUtils.ROOT + "\\AppData\\Local\\osu!");
 	public final File dir;
 	public final File songsDir;
@@ -20,7 +21,7 @@ public class OsuDir extends Cleaner {
 					"\n\nWould you like to change it? (y/n)");
 			
 			String[] options = {"y", "yes", "n", "no"};
-			String input = getInput(options);
+			String input = ConsoleReader.getInput(options);
 			
 			if (input.equals(options[2]) || input.equals(options[3])) {
 				return DEFAULT_OSU_DIR;
@@ -35,7 +36,7 @@ public class OsuDir extends Cleaner {
 		
 		while (true) {
 			System.out.print(beginning);
-			String inputPath = getInput(Main.EMPTY_ARRAY).replace("/", "\\");
+			String inputPath = ConsoleReader.getInput().replace("/", "\\");
 			File inputOsuDir = new File(beginning + inputPath);
 			
 			if (!inputOsuDir.exists()) {

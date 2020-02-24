@@ -1,4 +1,4 @@
-package com.gmail.matejpesl1.beatmaps.tools;
+package com.gmail.matejpesl1.utils.ioutils;
 
 import org.eclipse.jdt.annotation.Nullable;
 

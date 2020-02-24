@@ -1,4 +1,4 @@
-package com.gmail.matejpesl1.beatmaps.tools;
+package com.gmail.matejpesl1.utils.fileutils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -60,35 +60,23 @@ public class FileUtils {
 	}
 	
 	public class FileSearch implements FileVisitor<Path> {
-		private ArrayList<String> namesOfDirsToSkip = new ArrayList<>();
 		private final ArrayList<String> finalFiles = new ArrayList<>();
-		private final ArrayList<String> keywords;
-		private final ArrayList<String> extensions;
+		private final ArrayList<String> extensions = new ArrayList<>();
+		private final File dirToSearch;
+		private final String nameOfStartingDir;
+		private ArrayList<String> namesOfDirsToSkip = new ArrayList<>();
 		private boolean returnFileNames;
-		private String nameOfStartingDir;
 		
-		public FileSearch(ArrayList<String> extensions, ArrayList<String> keywords) {
-			this.extensions = extensions;
-			this.keywords = keywords;
+		public FileSearch(Path dir) {
+			this.extensions.addAll(extensions);
+			nameOfStartingDir = dir.getFileName().toString();
+			dirToSearch(new File(dir));
 		}
 		
-		public FileSearch(String extension, ArrayList<String> keywords) {
-			if (extension != null) {
-				this.extensions = new ArrayList<>(Collections.singletonList(extension));
-			} else {
-				this.extensions = null;
-			}
-			this.keywords = keywords;
-		}
-		
-		public ArrayList<String> searchFiles(File dir, boolean includeSubDirs, boolean returnFileNames, ArrayList<String> namesOfDirsToSkip) {
-			return searchFiles(Paths.get(dir.getPath()), includeSubDirs, returnFileNames, namesOfDirsToSkip);
-		}
-		
-		public ArrayList<String> searchFiles(Path dir, boolean includeSubDirs, boolean returnFileNames, ArrayList<String> namesOfDirsToSkip) {
+		public ArrayList<String> searchFiles(ArrayList<String> extensions, boolean includeSubDirs, boolean returnFileNames, ArrayList<String> namesOfDirsToSkip) {
 			this.returnFileNames = returnFileNames;
 			this.namesOfDirsToSkip = namesOfDirsToSkip;
-			nameOfStartingDir = dir.getFileName().toString();
+			
 			
 			try {
 				Files.walkFileTree(dir, EnumSet.noneOf(FileVisitOption.class), includeSubDirs ? Integer.MAX_VALUE : 1, this);
@@ -113,14 +101,8 @@ public class FileUtils {
 			if (dirName.equals(nameOfStartingDir) || extensions != null) {
 				return FileVisitResult.CONTINUE;
 			}
-			
-			if (keywords != null) {
-				if (keywords.parallelStream().anyMatch(dirName::contains)) {
-					finalFiles.add(returnFileNames ? dirName + " (složka)": pathToDir);
-				}
-			} else {
-				finalFiles.add(returnFileNames ? dirName : pathToDir);	
-			}
+
+			finalFiles.add(returnFileNames ? dirName : pathToDir);	
 			
 			return FileVisitResult.CONTINUE;
 		}
@@ -134,7 +116,6 @@ public class FileUtils {
 			String fileExtension = filePath.toFile().isDirectory() ? "" : filename.substring(filename.lastIndexOf(".") + 1);
 			String pathToFile = filePath.toString();
 			boolean extensionEquals = false;
-			boolean keywordEquals = false;
 			
 			if (extensions != null) {
 				for (String extension : extensions) {
@@ -146,16 +127,6 @@ public class FileUtils {
 			}
 			
 			if (!extensionEquals && extensions != null) {
-				return FileVisitResult.CONTINUE;
-			}
-			if (keywords != null) {
-				boolean containsKeyword = keywords.parallelStream().anyMatch(filename::contains);
-				if (containsKeyword) {
-					keywordEquals = true;
-				} 
-			}
-			
-			if (!keywordEquals && keywords != null) {
 				return FileVisitResult.CONTINUE;
 			}
 			

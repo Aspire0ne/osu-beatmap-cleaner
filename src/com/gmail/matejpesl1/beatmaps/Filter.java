@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
+
 public class Filter extends Cleaner {
 	public enum BeatmapFilter {DIFFICULTY, MODE};
 	public enum OsuMode {TAIKO, STANDARD, MANIA, CATCH};
@@ -34,7 +36,7 @@ public class Filter extends Cleaner {
 		
 		Filter filter = new Filter();
 		
-		switch (getInput(ABCD_OPTIONS)) {
+		switch (ConsoleReader.getInput(ABCD_OPTIONS)) {
 			case "a": break;
 			case "b": filter = obtainDifficultyFilter(null); break;
 			case "c": filter = obtainModeFilter(null); break;
@@ -53,7 +55,7 @@ public class Filter extends Cleaner {
 				+ "\nb - osu!mania"
 				+ "\nc - osu!catch"
 				+ "\nd - osu!taiko");
-		String input = getInput(ABCD_OPTIONS);
+		String input = ConsoleReader.getInput(ABCD_OPTIONS);
 		OsuMode mode = null;
 		switch (input) {
 		case "a": mode = OsuMode.STANDARD; break;
@@ -88,7 +90,7 @@ public class Filter extends Cleaner {
 		Pattern[] options = {Pattern.compile(diffRange),
 				Pattern.compile("[<]" + diffRange),
 				Pattern.compile("[>]" + diffRange)};
-		return getInput(options, true);
+		return ConsoleReader.getInput(options, true);
 	}
 	
 	public ArrayList<BeatmapFilter> getFilters() {
