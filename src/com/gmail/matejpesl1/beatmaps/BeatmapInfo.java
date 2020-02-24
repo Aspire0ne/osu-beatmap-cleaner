@@ -1,8 +1,10 @@
 package com.gmail.matejpesl1.beatmaps;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -99,5 +101,19 @@ public class BeatmapInfo {
 	    reader.close();
 	    stream.close();
 	    return new String[] {diffLine, modeLine, backgroundImgNameLine};
+	}
+	
+	public static String getBackgroundImgName(File dir) throws IOException {
+		File[] matchingFiles = dir.listFiles(new FilenameFilter() {
+			@Override
+		    public boolean accept(File dir, String name) {
+		        return name.endsWith(".osu");
+		    }
+		});
+		if (matchingFiles.length == 0) {
+			return null;
+		} else {
+			return getBeatmapInfo(dir.toPath()).getBackgroundImageName();
+		}
 	}
 }
