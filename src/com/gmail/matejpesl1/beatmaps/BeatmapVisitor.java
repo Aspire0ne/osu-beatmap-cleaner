@@ -103,7 +103,7 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 				case REMOVE_BEATMAPS:
 					Files.delete(arg0); break;
 				case REMOVE_SKIN: {
-					if (filename.endsWith(".png" || filename.endsWith(".jpg")) && !isBackground) {
+					if (filename.endsWith(".png") || filename.endsWith(".jpg") && !isBackground) {
 						Files.delete(arg0);
 					}
 				} break;
