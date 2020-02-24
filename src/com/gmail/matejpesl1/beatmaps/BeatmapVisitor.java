@@ -8,6 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.EnumSet;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import com.gmail.matejpesl1.beatmaps.Cleaner.CleanerOption;
 import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
 
@@ -22,6 +28,7 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 	protected BeatmapVisitor(OsuDir osuDir) {
 		this.osuDir = osuDir;
 	}
+	
 	protected void cleanSongs(Filter filter, CleanerOption option) {
 		this.filter = filter;
 		this.option = option;
@@ -48,34 +55,58 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 	
 	@Override
 	public FileVisitResult visitFile(Path arg0, BasicFileAttributes arg1) throws IOException {
-		if (arg0.endsWith(".osu")) {
-			
+		String filename = arg0.getFileName().toString();
+		boolean isSound = filename.endsWith("wav") || filename.endsWith("mp3");
+		BeatmapInfo info = null;
+		float soundDurationSec = 0;
+		if (isSound) {
+			try {
+				AudioInputStream ais = AudioSystem.getAudioInputStream(arg0.toFile());
+			    AudioFormat format = ais.getFormat();
+			    long audioFileLength = arg0.toFile().length();
+			    int frameSize = format.getFrameSize();
+			    float frameRate = format.getFrameRate();
+			    soundDurationSec = (audioFileLength / (frameSize * frameRate));
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			}
 		}
+
+		if (arg0.endsWith(".osu")) {
+			info = BeatmapInfo.getBeatmapInfo(arg0);
+		}
+		
 		if (!filter.getBeatmapFilters().isEmpty()) {
 			if (arg0.endsWith(".osu")) {
 				
 			}
 		} else {
 			switch (option) {
-				case REMOVE_BACKGROUNDS:
-					if (arg0.endsWith(".jpg"))
+				case REMOVE_BACKGROUNDS: {
+					if (arg0.getFileName().toString().equals(info.getBackgroundImageName())) {
 						Files.delete(arg0);
-					break;
-				case REMOVE_STORYBOARDS:
-					if (Files.isDirectory(arg0) && arg0.getFileName().toString().equals("Storyboard"))
+					}	
+				} break;
+				case REMOVE_STORYBOARDS: {
+					if (Files.isDirectory(arg0) && arg0.getFileName().toString().contains("Storyboard")) {
 						Files.delete(arg0);
-					break;
-			/*if there is no filter and option is delete beatmap,
-			the entire folder is deleted in preVisitDirectory, which
-			means that this case will never be true */
-			case REMOVE_BEATMAPS:
-				Files.delete(arg0); break;
-			case REMOVE_SKIN:
-				break;
-			case REMOVE_SOUNDS:
-				break;
-			default:
-				break;
+					}
+				} break;
+				/*if there is no filter and option is delete beatmap,
+				the entire folder is deleted in preVisitDirectory, which
+				means that this case will never be true */
+				case REMOVE_BEATMAPS:
+					Files.delete(arg0); break;
+				case REMOVE_SKIN: {
+					if (arg0.getFileName().endsWith(".png") && !arg0.getFileName().toString().equals(info.getBackgroundImageName())) {
+						Files.delete(arg0);
+					}
+				} break;
+				case REMOVE_SOUNDS: {
+					if (arg0.getFileName().endsWith(".wav") && soundDurationSec < 15) {
+						Files.delete(arg0);
+					}
+				} break;
 			}
 		}
 	}

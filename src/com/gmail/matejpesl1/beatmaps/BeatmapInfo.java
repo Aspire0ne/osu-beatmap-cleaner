@@ -39,7 +39,7 @@ public class BeatmapInfo {
 		return backgroundImageName;
 	}
 	
-	protected static BeatmapInfo getBeatmapInfo(Path beatmap, ArrayList<Info> infoToReturn) throws IOException {
+	protected static BeatmapInfo getBeatmapInfo(Path beatmap) throws IOException {
 		String[] linesWithInfo = getBeatmapInfoLines(beatmap);
 		
 		String backgroundImgName = linesWithInfo[2].substring(
