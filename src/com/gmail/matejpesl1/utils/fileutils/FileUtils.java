@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 
+import com.gmail.matejpesl1.beatmaps.Filter;
+
 public class FileUtils {
 	public static final String ROOT = System.getProperty("user.home");
 	
@@ -62,7 +64,7 @@ public class FileUtils {
 	public class FileSearch implements FileVisitor<Path> {
 		private final ArrayList<String> finalFiles = new ArrayList<>();
 		private final ArrayList<String> extensions = new ArrayList<>();
-		private final File dirToSearch;
+		private final Path dirToSearch;
 		private final String nameOfStartingDir;
 		private ArrayList<String> namesOfDirsToSkip = new ArrayList<>();
 		private boolean returnFileNames;
@@ -70,16 +72,14 @@ public class FileUtils {
 		public FileSearch(Path dir) {
 			this.extensions.addAll(extensions);
 			nameOfStartingDir = dir.getFileName().toString();
-			dirToSearch(new File(dir));
+			dirToSearch = dir;
 		}
 		
-		public ArrayList<String> searchFiles(ArrayList<String> extensions, boolean includeSubDirs, boolean returnFileNames, ArrayList<String> namesOfDirsToSkip) {
-			this.returnFileNames = returnFileNames;
+		public ArrayList<String> searchFiles(Filter filter, ArrayList<String> namesOfDirsToSkip) {
 			this.namesOfDirsToSkip = namesOfDirsToSkip;
 			
-			
 			try {
-				Files.walkFileTree(dir, EnumSet.noneOf(FileVisitOption.class), includeSubDirs ? Integer.MAX_VALUE : 1, this);
+				Files.walkFileTree(dirToSearch, EnumSet.noneOf(FileVisitOption.class), includeSubDirs ? Integer.MAX_VALUE : 1, this);
 			} catch (IOException e) {
 				e.printStackTrace();
 				
