@@ -103,17 +103,22 @@ public class BeatmapInfo {
 	    return new String[] {diffLine, modeLine, backgroundImgNameLine};
 	}
 	
-	public static String getBackgroundImgName(File dir) throws IOException {
-		File[] matchingFiles = dir.listFiles(new FilenameFilter() {
+	public static ArrayList<String> getBackgroundImgNames(File dir) throws IOException {
+		ArrayList<String> names = new ArrayList<>();
+		
+		for (File beatmap : getBeatmapsInDir(dir)) {
+			names.add(getBeatmapInfo(beatmap.toPath()).getBackgroundImageName());
+		}
+		
+		return names;
+	}
+	
+	private static File[] getBeatmapsInDir(File dir) {
+		return dir.listFiles(new FilenameFilter() {
 			@Override
 		    public boolean accept(File dir, String name) {
 		        return name.endsWith(".osu");
 		    }
 		});
-		if (matchingFiles.length == 0) {
-			return null;
-		} else {
-			return getBeatmapInfo(dir.toPath()).getBackgroundImageName();
-		}
 	}
 }
