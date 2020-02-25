@@ -7,6 +7,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -26,6 +27,8 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 	private final OsuDir osuDir;
 	CleanerOption option;
 	Filter filter;
+	File dirToMoveFilesInto;
+	private boolean move;
 	
 	int visitingErrorCounter;
 	int totalErrorCounter;
@@ -40,10 +43,12 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		this.osuDir = osuDir;
 	}
 	
-	protected Result cleanSongs(Filter filter, CleanerOption option) {
+	protected Result cleanSongs(Filter filter, CleanerOption option, File dirToMoveTo) {
 		io.println(MsgType.INFO, "Starting process...");
 		this.filter = filter;
 		this.option = option;
+		this.dirToMoveFilesInto = dirToMoveTo;
+		move = dirToMoveTo != null;
 		try {
 			//TODO: Test maxDepth and potentially change it to 2
 			Files.walkFileTree(osuDir.getSongsDir().toPath(), EnumSet.noneOf(FileVisitOption.class), 1 , this);
@@ -113,18 +118,30 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		boolean isSound = filename.endsWith(".wav") || filename.endsWith(".mp3");
 		boolean isStoryboard = (Files.isDirectory(arg0) && filename.contains("Storyboard"));
 		float soundDurationSec = isSound ? getSoundDurationSec(arg0) : null;
-		
+
 		if (meetsFilter || filter.getBeatmapFilters().isEmpty()) {
 			switch (option) {
-			case REMOVE_BACKGROUNDS: if (isBackground) Files.delete(arg0); break;
-			case REMOVE_STORYBOARDS: if (isStoryboard) Files.delete(arg0); break;
+			case REMOVE_BACKGROUNDS: if (isBackground) deleteOrMove(arg0); break;
+			case REMOVE_STORYBOARDS: if (isStoryboard) deleteOrMove(arg0); break;
 			//already handled in preVisitDirectory
-			case REMOVE_BEATMAPS: if (isBeatmap) Files.delete(arg0); break;
-			case REMOVE_SKIN: if (isSkin) Files.delete(arg0); break;
-			case REMOVE_SOUNDS: if (isSound && soundDurationSec < 14) Files.delete(arg0); break;
+			case REMOVE_BEATMAPS: if (isBeatmap) deleteOrMove(arg0); break;
+			case REMOVE_SKIN: if (isSkin) deleteOrMove(arg0); break;
+			case REMOVE_SOUNDS: if (isSound && soundDurationSec < 14) deleteOrMove(arg0); break;
 			}
 		}
 		return FileVisitResult.CONTINUE;
+	}
+	
+	private void deleteOrMove(Path file) {
+		try {
+			if (move) {
+				Files.move(file, dirToMoveFilesInto.toPath(), StandardCopyOption.REPLACE_EXISTING);	
+			} else {
+				Files.delete(file);	
+			}	
+		} catch (IOException e) {
+			++totalErrorCounter;
+		}
 	}
 	
 	private boolean meetsFilter(BeatmapInfo info) {

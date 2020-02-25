@@ -1,8 +1,10 @@
 package com.gmail.matejpesl1.beatmaps;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.gmail.matejpesl1.beatmaps.BeatmapVisitor.Result;
+import com.gmail.matejpesl1.utils.FileUtils;
 import com.gmail.matejpesl1.utils.IOUtils;
 import com.gmail.matejpesl1.utils.IOUtils.MsgType;
 
@@ -21,13 +23,13 @@ public class Cleaner {
 		Filter filter = Filter.obtainCleanerFilters();
 		OsuDir osuDir = new OsuDir(OsuDir.obtainDir());
 		
+		File dirToMoveTo = obtainRemoveOrMove();
 		io.println(MsgType.INFO, "Press any key to start the process");
 		
 		waitForKeyPress();
 		BeatmapVisitor visitor = new BeatmapVisitor(osuDir);
-		Result result = visitor.cleanSongs(filter, cleanerOption);
-		System.out.println("\n");
-		io.println(MsgType.ORDINARY, "Process finished. Results: "
+		Result result = visitor.cleanSongs(filter, cleanerOption, dirToMoveTo);
+		io.println(MsgType.ORDINARY, "\n\nProcess finished. Results: "
 				+ "\n Processed beatmaps: " + result.processedBeatmaps
 				+ "\n Visiting errors: " + result.visitingErrorCounter
 				+ "\n General errors: " + result.totalErrorCounter);
@@ -54,17 +56,46 @@ public class Cleaner {
 					+ "\nProgram will start the process", e);
 		}
 	}
+	
+	private File obtainRemoveOrMove() {
+		io.println(MsgType.ORDINARY, "Remove or move to a specified folder?"
+				+ "\na - remove"
+				+ "\nb - move");
+		String[] options = {"a", "b"};
+		switch (io.getInput(options)) {
+			case "a": return null;
+			case "b": return obtainMoveDir();
+		}
+		return null;
+	}
+	
+	private File obtainMoveDir() {
+			io.println(MsgType.ORDINARY, "Please specify folder to move the files to:");
+			String beginning = FileUtils.ROOT.replace("\\", "/") + "/";
+			
+			while (true) {
+				io.print(MsgType.ORDINARY, beginning);
+				String inputPath = io.getInput().replace("/", "\\");
+				File file = new File(beginning + inputPath);
+				
+				if (!file.exists()) {
+					io.println(MsgType.ORDINARY, "\nNon-existent path. Please try again.");
+					continue;
+				}
+				
+				return file;	
+			}
+	}
 
 	private CleanerOption obtainCleanerOption() {
 		io.println(MsgType.ORDINARY, "Select Cleaner option"
 				+ " (Option will be executed only on beatmaps that"
 				+ " meet the filter you'll choose later):"
-				+ "\na - remove background videos"
-				+ "\nb - remove background images"
-				+ "\nc - remove beatmaps"
-				+ "\nd - remove beatmaps' skin"
-				+ "\ne - remove beatmaps' sound effects"
-				+ "\nf - remove beatmaps' storyboard");
+				+ "\na - remove/move storyboards"
+				+ "\nb - remove/move background images"
+				+ "\nc - remove/move beatmaps"
+				+ "\nd - remove/move beatmaps' skin"
+				+ "\ne - remove/move beatmaps' sound effects");
 		
 		String[] options = {"a", "b", "c", "d", "e"};
 		switch (io.getInput(options)) {
