@@ -1,13 +1,15 @@
 package com.gmail.matejpesl1.beatmaps;
 
-import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
+import com.gmail.matejpesl1.utils.IOUtils;
+import com.gmail.matejpesl1.utils.IOUtils.MsgType;
 
-public class Main extends ConsolePrinter {
+public class Main {
 	public static boolean isEnviromentIde;
+	private static final IOUtils io = new IOUtils();
 	
 	public static void main(String[] args) {
-		isEnviromentIde = isEnviromentIde();
-		println(MsgType.INFO,
+		isEnviromentIde = isEnviromentIde();		
+		io.println(MsgType.INFO,
 				"Cleaner has been launched in " + (isEnviromentIde ? "IDE mode" : "non-IDE mode") + "\n");
 		showLogo();
 		sleep(3000);
@@ -16,7 +18,7 @@ public class Main extends ConsolePrinter {
 	}
 	
 	private static void showLogo() {
-		print(MsgType.ORDINARY,
+		io.print(MsgType.ORDINARY,
 				"\r\n" + 
 				"                    ____            _                         \r\n" + 
 				"                   / __ \\          | |                        \r\n" + 
@@ -31,10 +33,10 @@ public class Main extends ConsolePrinter {
 				" | | | | | | (_| | |_) | | (__| |  __/ (_| | | | |  __/ |   \r\n" + 
 				" |_| |_| |_|\\__,_| .__/   \\___|_|\\___|\\__,_|_| |_|\\___|_|   \r\n" + 
 				"                 | |                                        \r\n");
-		print(MsgType.ORDINARY,
+		io.print(MsgType.ORDINARY,
 				"                 |_|");
 		sleep(2500);
-        println(MsgType.ORDINARY, "               by matejpesl1@gmail.com       \r\n");
+        io.println(MsgType.ORDINARY, "               by matejpesl1@gmail.com       \r\n");
 	}
 	
 	public static boolean isEnviromentIde() {
@@ -57,7 +59,7 @@ public class Main extends ConsolePrinter {
 			}
 			
 		} catch (InterruptedException e) {
-			println(MsgType.ERROR, "Main thread was interrupted from sleep", e);
+			io.println(MsgType.ERROR, "Main thread was interrupted from sleep", e);
 		}
 	}
 }

@@ -1,11 +1,13 @@
 package com.gmail.matejpesl1.beatmaps;
 
 import java.io.IOException;
-import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
-import com.gmail.matejpesl1.utils.ioutils.ConsoleReader;
 
-public class Cleaner extends ConsolePrinter {
+import com.gmail.matejpesl1.utils.IOUtils;
+import com.gmail.matejpesl1.utils.IOUtils.MsgType;
+
+public class Cleaner {
 	public static final String[] ABCD_OPTIONS = {"a", "b", "c", "d"};
+	private static final IOUtils io = new IOUtils();
 	public enum CleanerOption {REMOVE_BACKGROUNDS, REMOVE_BEATMAPS,
 		REMOVE_SKIN, REMOVE_STORYBOARDS, REMOVE_SOUNDS};
 		
@@ -18,7 +20,7 @@ public class Cleaner extends ConsolePrinter {
 		Filter filter = Filter.obtainCleanerFilters();
 		OsuDir osuDir = new OsuDir(OsuDir.obtainDir());
 		
-		println(MsgType.INFO, "Press any key to start the process");
+		io.println(MsgType.INFO, "Press any key to start the process");
 		
 		waitForKeyPress();
 		BeatmapVisitor visitor = new BeatmapVisitor(osuDir);
@@ -27,21 +29,21 @@ public class Cleaner extends ConsolePrinter {
 	
 	private void waitForKeyPress() {
 		try {
-			ConsoleReader.waitForKeyPress();
+			io.waitForKeyPress();
 		} catch (InterruptedException e) {
-			println(MsgType.ERROR, "Program interrupted while waiting for user input."
+			io.println(MsgType.ERROR, "Program interrupted while waiting for user input."
 					+ "\nProgram will start the process.", e);
 		} catch (IOException e) {
-			println(MsgType.ERROR, "An error while waiting for user input."
+			io.println(MsgType.ERROR, "An error while waiting for user input."
 					+ "\nProgram will start the process", e);
 		} catch (SecurityException e) {
-			println(MsgType.ERROR, "Antivirus probably blocked waiting for user input."
+			io.println(MsgType.ERROR, "Antivirus probably blocked waiting for user input."
 					+ "\nProgram will start the process", e);
 		}
 	}
 
 	private CleanerOption obtainCleanerOption() {
-		println(MsgType.ORDINARY, "Select Cleaner option"
+		io.println(MsgType.ORDINARY, "Select Cleaner option"
 				+ " (Option will be executed only on beatmaps that"
 				+ " meet the filter you'll choose later):"
 				+ "\na - remove background videos"
@@ -52,7 +54,7 @@ public class Cleaner extends ConsolePrinter {
 				+ "\nf - remove beatmaps' storyboard");
 		
 		String[] options = {"a", "b", "c", "d", "e"};
-		switch (ConsoleReader.getInput(options)) {
+		switch (io.getInput(options)) {
 			case "a": return CleanerOption.REMOVE_STORYBOARDS;
 			case "b": return CleanerOption.REMOVE_BACKGROUNDS;
 			case "c": return CleanerOption.REMOVE_BEATMAPS;

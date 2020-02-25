@@ -13,11 +13,12 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
 import com.gmail.matejpesl1.beatmaps.Cleaner.CleanerOption;
-import com.gmail.matejpesl1.utils.ioutils.ConsolePrinter;
+import com.gmail.matejpesl1.utils.IOUtils;
+import com.gmail.matejpesl1.utils.IOUtils.MsgType;
 
-public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> {
+public class BeatmapVisitor implements FileVisitor<Path> {
+	private static final IOUtils io = new IOUtils();
 	private final OsuDir osuDir;
 	Filter filter;
 	CleanerOption option;
@@ -34,7 +35,7 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 		this.filter = filter;
 		this.option = option;
 		
-		println(MsgType.INFO, "Processing beatmaps...");
+		io.println(MsgType.INFO, "Processing beatmaps...");
 		try {
 			//TODO: Test maxDepth and potentially change it to 2
 			Files.walkFileTree(osuDir.getSongsDir().toPath(), EnumSet.noneOf(FileVisitOption.class), 1 , this);
@@ -45,7 +46,7 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 	
 	@Override
 	public FileVisitResult preVisitDirectory(Path arg0, BasicFileAttributes arg1) throws IOException {
-		println(MsgType.INFO, "Visiting: " + arg0.getFileName());
+		io.println(MsgType.INFO, "Visiting: " + arg0.getFileName());
 		
 		if (filter.getBeatmapFilters().isEmpty() && option == CleanerOption.REMOVE_BEATMAPS) {
 			Files.delete(arg0);
@@ -124,7 +125,7 @@ public class BeatmapVisitor extends ConsolePrinter implements FileVisitor<Path> 
 
 	@Override
 	public FileVisitResult visitFileFailed(Path arg0, IOException arg1) throws IOException {
-		println(MsgType.ERROR, "Failed visiting " + arg0.getFileName());
+		io.println(MsgType.ERROR, "Failed visiting " + arg0.getFileName());
 		++visitingErrorCounter;
 		return FileVisitResult.CONTINUE;
 	}

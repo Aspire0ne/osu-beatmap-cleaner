@@ -1,4 +1,4 @@
-package com.gmail.matejpesl1.utils.fileutils;
+package com.gmail.matejpesl1.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
