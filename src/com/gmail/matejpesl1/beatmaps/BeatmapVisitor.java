@@ -29,13 +29,19 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 	
 	int visitingErrorCounter;
 	int totalErrorCounter;
+	int processedBeatmaps;
+	int deletedBeatmaps;
+	int deletedStoryboards;
+	int deletedSkins;
+	int deletedSounds;
+	int deletedBackgrounds;
 	
 	protected BeatmapVisitor(OsuDir osuDir) {
 		this.osuDir = osuDir;
 	}
 	
-	protected void cleanSongs(Filter filter, CleanerOption option) {
-		io.println(MsgType.INFO, "Processing beatmaps...");
+	protected Result cleanSongs(Filter filter, CleanerOption option) {
+		io.println(MsgType.INFO, "Starting process...");
 		this.filter = filter;
 		this.option = option;
 		try {
@@ -44,12 +50,37 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		} catch (IOException e) {
 			++totalErrorCounter;
 		}
+		io.println(MsgType.INFO, "Finishing process...");
+		Result result = new Result(visitingErrorCounter, totalErrorCounter, processedBeatmaps);
+		result.deletedBackgrounds = deletedBackgrounds;
+		result.deletedBeatmaps = deletedBeatmaps;
+		result.deletedSounds = deletedSounds;
+		result.deletedSkins = deletedSkins;
+		result.deletedStoryboards = deletedStoryboards;
+		return result;
+	}
+	
+	protected class Result {
+		public int visitingErrorCounter;
+		public int totalErrorCounter;
+		public int processedBeatmaps;
+		
+		public int deletedBeatmaps;
+		public int deletedStoryboards;
+		public int deletedSkins;
+		public int deletedSounds;
+		public int deletedBackgrounds;
+		
+		private Result(int visitingErrorCounter, int totalErrorCounter, int processedBeatmaps) {
+			this.visitingErrorCounter = visitingErrorCounter;
+			this.totalErrorCounter = totalErrorCounter;
+			this.processedBeatmaps = processedBeatmaps;
+		}
 	}
 	
 	@Override
 	public FileVisitResult preVisitDirectory(Path arg0, BasicFileAttributes arg1) throws IOException {
-		io.println(MsgType.INFO, "Visiting: " + arg0.getFileName());
-		
+		++processedBeatmaps;
 		if (filter.getBeatmapFilters().isEmpty() && option == CleanerOption.REMOVE_BEATMAPS) {
 			Files.delete(arg0);
 			return FileVisitResult.SKIP_SUBTREE;
@@ -58,8 +89,10 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		currentBeatmapBackgroundImgNames = BeatmapInfo.getBackgroundImgNames(arg0.toFile());
 		
 		if (currentBeatmapBackgroundImgNames.isEmpty()) {
-			io.print(MsgType.INFO, "Corrupted: " + arg0.getFileName());
+			io.println(MsgType.ERROR, "Corrupted: " + arg0.getFileName());
 			return FileVisitResult.SKIP_SUBTREE;
+		} else {
+			io.println(MsgType.INFO, "Visiting: " + arg0.getFileName());
 		}
 		
 		return FileVisitResult.CONTINUE;

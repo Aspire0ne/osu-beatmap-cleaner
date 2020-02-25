@@ -2,6 +2,7 @@ package com.gmail.matejpesl1.beatmaps;
 
 import java.io.IOException;
 
+import com.gmail.matejpesl1.beatmaps.BeatmapVisitor.Result;
 import com.gmail.matejpesl1.utils.IOUtils;
 import com.gmail.matejpesl1.utils.IOUtils.MsgType;
 
@@ -24,7 +25,19 @@ public class Cleaner {
 		
 		waitForKeyPress();
 		BeatmapVisitor visitor = new BeatmapVisitor(osuDir);
-		visitor.cleanSongs(filter, cleanerOption);
+		Result result = visitor.cleanSongs(filter, cleanerOption);
+		System.out.println("\n");
+		io.println(MsgType.ORDINARY, "Process finished. Results: "
+				+ "\n Processed beatmaps: " + result.processedBeatmaps
+				+ "\n Visiting errors: " + result.visitingErrorCounter
+				+ "\n General errors: " + result.totalErrorCounter);
+		switch (cleanerOption) {
+		case REMOVE_BACKGROUNDS: io.println(MsgType.ORDINARY, "\n removed backgrounds: " + result.deletedBackgrounds); break;
+		case REMOVE_BEATMAPS: io.println(MsgType.ORDINARY, "\n removed beatmaps: " + result.deletedBeatmaps); break;
+		case REMOVE_SKIN: io.println(MsgType.ORDINARY, "\n removed skin elements: " + result.deletedSkins); break;
+		case REMOVE_SOUNDS: io.println(MsgType.ORDINARY, "\n removed sounds: " + result.deletedSounds); break;
+		case REMOVE_STORYBOARDS: io.println(MsgType.ORDINARY, "\n removed storyboards: " + result.deletedStoryboards); break;
+		}
 	}
 	
 	private void waitForKeyPress() {
