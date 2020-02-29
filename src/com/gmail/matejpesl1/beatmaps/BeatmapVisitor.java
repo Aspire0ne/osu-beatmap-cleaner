@@ -16,6 +16,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
+import com.gmail.matejpesl1.beatmaps.BeatmapInfo.UncompleteBeatmapInfoException;
 import com.gmail.matejpesl1.beatmaps.Cleaner.CleanerOption;
 import com.gmail.matejpesl1.beatmaps.Filter.BeatmapFilter;
 import com.gmail.matejpesl1.utils.IOUtils;
@@ -50,8 +52,7 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		this.dirToMoveFilesInto = dirToMoveTo;
 		move = dirToMoveTo != null;
 		try {
-			//TODO: Test maxDepth and potentially change it to 2
-			Files.walkFileTree(osuDir.getSongsDir().toPath(), EnumSet.noneOf(FileVisitOption.class), 1 , this);
+			Files.walkFileTree(osuDir.getSongsDir().toPath(), EnumSet.noneOf(FileVisitOption.class), 2, this);
 		} catch (IOException e) {
 			++totalErrorCounter;
 		}
@@ -85,21 +86,31 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 	
 	@Override
 	public FileVisitResult preVisitDirectory(Path arg0, BasicFileAttributes arg1) throws IOException {
+		io.println(MsgType.INFO, "Visiting: " + arg0.getFileName());
+		if (arg0.getFileName().toString().equals("Songs")) {
+			io.println(MsgType.DEBUG, "songs folder -> continue");
+			return FileVisitResult.CONTINUE;
+		}
+		
+		io.println(MsgType.DEBUG, "1");
 		++processedBeatmaps;
-		if (filter.getBeatmapFilters().isEmpty() && option == CleanerOption.REMOVE_BEATMAPS) {
-			Files.delete(arg0);
+		if ((filter.getBeatmapFilters().isEmpty() && option == CleanerOption.REMOVE_BEATMAPS)) {
+			deleteOrMove(arg0);
 			return FileVisitResult.SKIP_SUBTREE;
 		}
 		
-		currentBeatmapBackgroundImgNames = BeatmapInfo.getBackgroundImgNames(arg0.toFile());
-		
-		if (currentBeatmapBackgroundImgNames.isEmpty()) {
+		io.println(MsgType.DEBUG, "2");
+		try {
+			currentBeatmapBackgroundImgNames = BeatmapInfo.getBackgroundImgNames(arg0.toFile());	
+		} catch (UncompleteBeatmapInfoException e) {
 			io.println(MsgType.ERROR, "Corrupted: " + arg0.getFileName());
+			e.printStackTrace();
 			return FileVisitResult.SKIP_SUBTREE;
-		} else {
-			io.println(MsgType.INFO, "Visiting: " + arg0.getFileName());
 		}
 		
+		io.println(MsgType.DEBUG, "3");
+		
+		io.println(MsgType.DEBUG, "4");
 		return FileVisitResult.CONTINUE;
 	}
 	
@@ -108,7 +119,12 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		String filename = arg0.getFileName().toString();
 		
 		boolean isBeatmap = filename.endsWith(".osu");
-		BeatmapInfo info = isBeatmap ? BeatmapInfo.getBeatmapInfo(arg0) : null;
+		BeatmapInfo info = null;
+		try {
+			info = isBeatmap ? BeatmapInfo.getBeatmapInfo(arg0) : null;
+		} catch (UncompleteBeatmapInfoException e) {
+			e.printStackTrace();
+		}
 		boolean meetsFilter = meetsFilter(info);
 		
 		if (!meetsFilter) return FileVisitResult.CONTINUE;
@@ -117,7 +133,7 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		boolean isSkin = filename.endsWith(".png") || (filename.endsWith(".jpg") && !isBackground);
 		boolean isSound = filename.endsWith(".wav") || filename.endsWith(".mp3");
 		boolean isStoryboard = (Files.isDirectory(arg0) && filename.contains("Storyboard"));
-		float soundDurationSec = isSound ? getSoundDurationSec(arg0) : null;
+		float soundDurationSec = isSound ? getSoundDurationSec(arg0) : -1;
 
 		if (meetsFilter || filter.getBeatmapFilters().isEmpty()) {
 			switch (option) {
@@ -174,6 +190,7 @@ public class BeatmapVisitor implements FileVisitor<Path> {
 		    float frameRate = format.getFrameRate();
 		    soundDurationSec = (audioFileLength / (frameSize * frameRate));
 		} catch (IOException | UnsupportedAudioFileException e) {
+			System.out.println(sound);
 			e.printStackTrace();
 		}
 		return soundDurationSec;

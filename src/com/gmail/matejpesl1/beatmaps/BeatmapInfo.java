@@ -17,6 +17,8 @@ import com.gmail.matejpesl1.beatmaps.Filter.OsuMode;
 
 public class BeatmapInfo {
 	protected enum Info {BACKGROUND_IMAGE_NAME, DIFFICULTY, MODE};
+	private static final Pattern newRegionPattern = Pattern.compile("[.*]");
+	private static final Pattern backgroundImgPattern = Pattern.compile(".*\".*.jpg\".*");
 	private static final ArrayList<String> regionsToRead =
 			new ArrayList<>(Arrays.asList("[Events]", "[General]", "[Difficulty]"));
 	private OsuMode mode;
@@ -41,12 +43,14 @@ public class BeatmapInfo {
 		return backgroundImageName;
 	}
 	
-	protected static BeatmapInfo getBeatmapInfo(Path beatmap) throws IOException {
-		String[] linesWithInfo = getBeatmapInfoLines(beatmap);
+	protected static BeatmapInfo getBeatmapInfo(Path beatmap) throws UncompleteBeatmapInfoException, IOException {
+		String[] linesWithInfo = getBeatmapInfoLines(beatmap.toFile());
+		String backgroundImgName = new String();
 		
-		String backgroundImgName = linesWithInfo[2].substring(
-				linesWithInfo[2].indexOf('\"')+1,
-				linesWithInfo[2].lastIndexOf('\"'));
+		backgroundImgName = linesWithInfo[2].substring(
+				linesWithInfo[2].indexOf('"')+1,
+				linesWithInfo[2].lastIndexOf('"'));
+		
 		float difficulty = Float.parseFloat(linesWithInfo[0].replaceAll("[^\\d.]", ""));
 		byte modeNum = Byte.parseByte(linesWithInfo[1].replaceAll("[^\\d.]", ""));
 		OsuMode mode = null;
@@ -60,50 +64,63 @@ public class BeatmapInfo {
 	    return new BeatmapInfo(difficulty, mode, backgroundImgName);
 	}
 	
-	private static String[] getBeatmapInfoLines(Path beatmap) throws IOException {
-		Reader reader = null;
-		FileInputStream stream = null;
-		try {
-			stream = new FileInputStream(beatmap.toFile());
-			reader = new InputStreamReader(stream, "windows-1250");	
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		BufferedReader br = new BufferedReader(reader);
-		
-		byte regionsRead = 0;
-		Pattern newRegionPattern = Pattern.compile("[.*]");
-		Pattern backgroundImgPattern = Pattern.compile(".*\".*.jpg\".*");
-		String line = new String();
+	@SuppressWarnings("serial")
+	public static class UncompleteBeatmapInfoException extends Exception { 
+	    public UncompleteBeatmapInfoException(String errorMessage, Throwable err) {
+	        super(errorMessage, err);
+	    }
+	}
+	
+	private static String[] getBeatmapInfoLines(File beatmap) throws UncompleteBeatmapInfoException, IOException {
+		String backgroundImgNameLine = new String();
 		String diffLine = new String();
 		String modeLine = new String();
-		String backgroundImgNameLine = new String();
 		
-		while ((line = br.readLine()) != null) {
-			if (newRegionPattern.matcher(line.trim()).matches()
-					|| (modeLine != null && diffLine != null && backgroundImgNameLine != null)) {
+		String currLine = new String();
+		byte regionsRead = 0;
+		BufferedReader br = getBeatmapInfoReader(beatmap);
+		
+		while ((currLine = br.readLine()) != null) {
+			if (newRegionPattern.matcher(currLine).matches()) {
 				if (regionsRead == regionsToRead.size()) {
 					break;
-				} else if (regionsToRead.contains(line)) {
+				} else if (regionsToRead.contains(currLine)) {
 					++regionsRead;
 				}
 			}
 			
-			if (backgroundImgPattern.matcher(line.trim()).matches()) {
-				backgroundImgNameLine = line;
-			} else if (line.contains("Mode:")) {
-				modeLine = line;
-			} else if (line.contains("OverallDifficulty:")) {
-				diffLine = line;
+			if (backgroundImgPattern.matcher(currLine).matches()) {
+				backgroundImgNameLine = currLine;
+			} else if (currLine.contains("Mode:")) {
+				modeLine = currLine;
+			} else if (currLine.contains("OverallDifficulty:")) {
+				diffLine = currLine;
 			}
 		}
 		br.close();
-	    reader.close();
-	    stream.close();
-	    return new String[] {diffLine, modeLine, backgroundImgNameLine};
+		
+		String[] gottenInfo = {diffLine, modeLine, backgroundImgNameLine};
+	    for (String info : gottenInfo) {
+	    	if (info.isEmpty())
+	    		throw new UncompleteBeatmapInfoException("Couldn't find necessary info in .osu file", new Throwable()); System.out.println(info);
+	    }
+	    return gottenInfo;
 	}
 	
-	public static ArrayList<String> getBackgroundImgNames(File dir) throws IOException {
+	private static BufferedReader getBeatmapInfoReader(File beatmap) throws FileNotFoundException {
+		Reader reader = null;
+			FileInputStream stream = new FileInputStream(beatmap);
+			try {
+				reader = new InputStreamReader(stream, "windows-1250");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				System.exit(0);
+			}	
+				
+		return new BufferedReader(reader);
+	}
+	
+	public static ArrayList<String> getBackgroundImgNames(File dir) throws IOException, UncompleteBeatmapInfoException {
 		ArrayList<String> names = new ArrayList<>();
 		
 		for (File beatmap : getBeatmapsInDir(dir)) {

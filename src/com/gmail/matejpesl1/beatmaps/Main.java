@@ -1,5 +1,7 @@
 package com.gmail.matejpesl1.beatmaps;
 
+import java.util.Objects;
+
 import com.gmail.matejpesl1.utils.IOUtils;
 import com.gmail.matejpesl1.utils.IOUtils.MsgType;
 
@@ -40,16 +42,14 @@ public class Main {
 	}
 	
 	public static boolean isEnviromentIde() {
-	    String runPath = Cleaner.class.getResource("Cleaner.class").getPath();
-	    /*if the program is compiled with "Package required libraries into generated JAR" option,
-	    Eclipse will use its jar-in-jar loader and the resource url will start with rsrc:*/
-	    boolean startedFromJar = (runPath.startsWith("jar:") || runPath.startsWith("rsrc:"));
+	    String protocol = io.getClass().getResource("").getProtocol();
+	    boolean startedFromJar = Objects.equals(protocol, "jar");
 	    
 	    String classPath = System.getProperty("java.class.path").toLowerCase();
 	    boolean isEclipse = classPath.contains("eclipse");
-	    boolean isNetbeans = classPath.contains("neatbeans");
 	    boolean isIdea = classPath.contains("idea_rt.jar");
-	    return (isEclipse || isIdea || !startedFromJar || isNetbeans);
+	    System.out.println("started from jar: " + startedFromJar);
+	    return (isEclipse || isIdea || !startedFromJar);
 	}
 	
 	public static void sleep(int duration) {
