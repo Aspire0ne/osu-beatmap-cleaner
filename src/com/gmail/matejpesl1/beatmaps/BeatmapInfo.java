@@ -32,7 +32,7 @@ public class BeatmapInfo {
 	}
 	
 	protected float getDifficulty() {
-		return difficulty;
+		return difficulty; 
 	}
 	
 	protected OsuMode getMode() {
