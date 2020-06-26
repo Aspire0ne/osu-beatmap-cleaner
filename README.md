@@ -1,2 +1,2 @@
 # osu-beatmap-cleaner
-A tool that cleans unnecessary files from osu! songs (such as removing videos or selected difficulty) using selected filters
+### A console tool that cleans unnecessary files from osu! songs directory (such as videos or selected difficulty) using chosen filters, reducing the folder size drastically.
